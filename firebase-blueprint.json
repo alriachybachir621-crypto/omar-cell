@@ -1,0 +1,129 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "A mobile phone or accessory offered by Omar Cell.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 140 },
+        "nameAr": { "type": "string", "maxLength": 140 },
+        "brand": { "type": "string", "minLength": 1, "maxLength": 60 },
+        "category": { "type": "string", "minLength": 1, "maxLength": 60 },
+        "price": { "type": "number" },
+        "oldPrice": { "type": "number" },
+        "storageOptions": { "type": "array" },
+        "colors": { "type": "array" },
+        "condition": { "type": "string", "enum": ["New", "Used"] },
+        "images": { "type": "array" },
+        "inStock": { "type": "boolean" },
+        "isNew": { "type": "boolean" },
+        "isSale": { "type": "boolean" },
+        "description": { "type": "string", "maxLength": 1200 },
+        "descriptionAr": { "type": "string", "maxLength": 1200 },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["name", "brand", "category", "price", "condition", "images", "inStock", "isNew", "isSale", "createdAt", "updatedAt"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "Storefront product category.",
+      "type": "object",
+      "properties": {
+        "slug": { "type": "string", "minLength": 1, "maxLength": 60, "pattern": "^[a-z0-9_-]+$" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "nameAr": { "type": "string", "maxLength": 80 },
+        "subtitle": { "type": "string", "maxLength": 160 },
+        "subtitleAr": { "type": "string", "maxLength": 160 },
+        "image": { "type": "string", "maxLength": 2048 },
+        "order": { "type": "number" }
+      },
+      "required": ["slug", "name", "order"]
+    },
+    "ServiceItem": {
+      "title": "ServiceItem",
+      "description": "A repair or concierge service offered by Omar Cell.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "titleAr": { "type": "string", "maxLength": 100 },
+        "description": { "type": "string", "maxLength": 400 },
+        "descriptionAr": { "type": "string", "maxLength": 400 },
+        "icon": { "type": "string", "maxLength": 40 },
+        "order": { "type": "number" }
+      },
+      "required": ["title", "icon", "order"]
+    },
+    "GalleryItem": {
+      "title": "GalleryItem",
+      "description": "Boutique showroom or featured delivery photo.",
+      "type": "object",
+      "properties": {
+        "image": { "type": "string", "minLength": 1, "maxLength": 2048 },
+        "caption": { "type": "string", "maxLength": 160 },
+        "captionAr": { "type": "string", "maxLength": 160 },
+        "order": { "type": "number" }
+      },
+      "required": ["image", "order"]
+    },
+    "ShopInfo": {
+      "title": "ShopInfo",
+      "description": "Global storefront hero, contact, hours, and location configuration.",
+      "type": "object",
+      "properties": {
+        "heroImages": { "type": "array" },
+        "heroTitle": { "type": "string", "maxLength": 140 },
+        "heroTitleAr": { "type": "string", "maxLength": 140 },
+        "heroSubtitle": { "type": "string", "maxLength": 280 },
+        "heroSubtitleAr": { "type": "string", "maxLength": 280 },
+        "whatsappNumber": { "type": "string", "maxLength": 30 },
+        "phoneDisplay": { "type": "string", "maxLength": 30 },
+        "address": { "type": "string", "maxLength": 200 },
+        "addressAr": { "type": "string", "maxLength": 200 },
+        "mapsEmbedUrl": { "type": "string", "maxLength": 2048 },
+        "mapsLink": { "type": "string", "maxLength": 2048 },
+        "hours": { "type": "string", "maxLength": 160 },
+        "hoursAr": { "type": "string", "maxLength": 160 },
+        "facebookUrl": { "type": "string", "maxLength": 2048 },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["heroImages", "whatsappNumber", "phoneDisplay", "address", "updatedAt"]
+    },
+    "AdminMeta": {
+      "title": "AdminMeta",
+      "description": "First-time passcode setup status flag.",
+      "type": "object",
+      "properties": {
+        "setupComplete": { "type": "boolean" },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["setupComplete", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": { "$ref": "#/entities/Product" },
+      "description": "Mobile devices and accessories catalog."
+    },
+    "/categories/{categoryId}": {
+      "schema": { "$ref": "#/entities/Category" },
+      "description": "Product categories."
+    },
+    "/services/{serviceId}": {
+      "schema": { "$ref": "#/entities/ServiceItem" },
+      "description": "Shop services (section hidden when empty)."
+    },
+    "/gallery/{galleryId}": {
+      "schema": { "$ref": "#/entities/GalleryItem" },
+      "description": "Boutique gallery images."
+    },
+    "/config/shopInfo": {
+      "schema": { "$ref": "#/entities/ShopInfo" },
+      "description": "Shop contact, hours, maps, and hero settings."
+    },
+    "/config/adminMeta": {
+      "schema": { "$ref": "#/entities/AdminMeta" },
+      "description": "Admin PIN initialization flag."
+    }
+  }
+}

@@ -1,0 +1,181 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.email == 'admin@omarcell.app';
+    }
+
+    function isOptionalString(data, field, maxLen) {
+      return !(field in data) || (data[field] is string && data[field].size() <= maxLen);
+    }
+
+    function isStringList(val, maxItems) {
+      return val is list && val.size() <= maxItems && (val.size() == 0 || val[0] is string);
+    }
+
+    function isValidProduct(data) {
+      return data.keys().hasAll(['name', 'brand', 'category', 'price', 'condition', 'images', 'inStock', 'isNew', 'isSale', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['name', 'nameAr', 'brand', 'category', 'price', 'oldPrice', 'storageOptions', 'colors', 'condition', 'images', 'inStock', 'isNew', 'isSale', 'description', 'descriptionAr', 'createdAt', 'updatedAt'])
+        && data.name is string && data.name.size() >= 1 && data.name.size() <= 140
+        && isOptionalString(data, 'nameAr', 140)
+        && data.brand is string && data.brand.size() >= 1 && data.brand.size() <= 60
+        && data.category is string && data.category.size() >= 1 && data.category.size() <= 60
+        && data.price is number && data.price >= 0 && data.price <= 100000
+        && (!('oldPrice' in data) || (data.oldPrice is number && data.oldPrice >= 0 && data.oldPrice <= 100000))
+        && (!('storageOptions' in data) || isStringList(data.storageOptions, 12))
+        && (!('colors' in data) || isStringList(data.colors, 12))
+        && data.condition in ['New', 'Used']
+        && isStringList(data.images, 10)
+        && data.inStock is bool
+        && data.isNew is bool
+        && data.isSale is bool
+        && isOptionalString(data, 'description', 1200)
+        && isOptionalString(data, 'descriptionAr', 1200)
+        && data.createdAt is number && data.createdAt >= 0
+        && data.updatedAt is number && data.updatedAt >= 0;
+    }
+
+    function isValidCategory(data) {
+      return data.keys().hasAll(['slug', 'name', 'order'])
+        && data.keys().hasOnly(['slug', 'name', 'nameAr', 'subtitle', 'subtitleAr', 'image', 'order'])
+        && data.slug is string && data.slug.size() >= 1 && data.slug.size() <= 60 && data.slug.matches('^[a-z0-9_\\-]+$')
+        && data.name is string && data.name.size() >= 1 && data.name.size() <= 80
+        && isOptionalString(data, 'nameAr', 80)
+        && isOptionalString(data, 'subtitle', 160)
+        && isOptionalString(data, 'subtitleAr', 160)
+        && isOptionalString(data, 'image', 2048)
+        && data.order is number && data.order >= 0 && data.order <= 10000;
+    }
+
+    function isValidService(data) {
+      return data.keys().hasAll(['title', 'icon', 'order'])
+        && data.keys().hasOnly(['title', 'titleAr', 'description', 'descriptionAr', 'icon', 'order'])
+        && data.title is string && data.title.size() >= 1 && data.title.size() <= 100
+        && isOptionalString(data, 'titleAr', 100)
+        && isOptionalString(data, 'description', 400)
+        && isOptionalString(data, 'descriptionAr', 400)
+        && data.icon is string && data.icon.size() >= 1 && data.icon.size() <= 40
+        && data.order is number && data.order >= 0 && data.order <= 10000;
+    }
+
+    function isValidGalleryItem(data) {
+      return data.keys().hasAll(['image', 'order'])
+        && data.keys().hasOnly(['image', 'caption', 'captionAr', 'order'])
+        && data.image is string && data.image.size() >= 1 && data.image.size() <= 2048
+        && isOptionalString(data, 'caption', 160)
+        && isOptionalString(data, 'captionAr', 160)
+        && data.order is number && data.order >= 0 && data.order <= 10000;
+    }
+
+    function isValidShopInfo(data) {
+      return data.keys().hasAll(['heroImages', 'whatsappNumber', 'phoneDisplay', 'address', 'updatedAt'])
+        && data.keys().hasOnly(['heroImages', 'heroTitle', 'heroTitleAr', 'heroSubtitle', 'heroSubtitleAr', 'whatsappNumber', 'phoneDisplay', 'address', 'addressAr', 'mapsEmbedUrl', 'mapsLink', 'hours', 'hoursAr', 'facebookUrl', 'updatedAt'])
+        && isStringList(data.heroImages, 6)
+        && isOptionalString(data, 'heroTitle', 140)
+        && isOptionalString(data, 'heroTitleAr', 140)
+        && isOptionalString(data, 'heroSubtitle', 280)
+        && isOptionalString(data, 'heroSubtitleAr', 280)
+        && data.whatsappNumber is string && data.whatsappNumber.size() >= 3 && data.whatsappNumber.size() <= 30
+        && data.phoneDisplay is string && data.phoneDisplay.size() >= 3 && data.phoneDisplay.size() <= 30
+        && data.address is string && data.address.size() >= 1 && data.address.size() <= 200
+        && isOptionalString(data, 'addressAr', 200)
+        && isOptionalString(data, 'mapsEmbedUrl', 2048)
+        && isOptionalString(data, 'mapsLink', 2048)
+        && isOptionalString(data, 'hours', 160)
+        && isOptionalString(data, 'hoursAr', 160)
+        && isOptionalString(data, 'facebookUrl', 2048)
+        && data.updatedAt is number && data.updatedAt >= 0;
+    }
+
+    function isValidAdminMeta(data) {
+      return data.keys().hasAll(['setupComplete', 'updatedAt'])
+        && data.keys().hasOnly(['setupComplete', 'updatedAt'])
+        && data.setupComplete is bool
+        && data.updatedAt is number && data.updatedAt >= 0;
+    }
+
+    match /products/{productId} {
+      allow get: if isValidId(productId);
+      allow list: if true;
+      allow create: if isAdmin() && isValidId(productId) && isValidProduct(incoming());
+      allow update: if isAdmin()
+        && isValidId(productId)
+        && isValidProduct(incoming())
+        && incoming().createdAt == existing().createdAt
+        && incoming().diff(existing()).affectedKeys().hasOnly(['name', 'nameAr', 'brand', 'category', 'price', 'oldPrice', 'storageOptions', 'colors', 'condition', 'images', 'inStock', 'isNew', 'isSale', 'description', 'descriptionAr', 'updatedAt']);
+      allow delete: if isAdmin() && isValidId(productId);
+    }
+
+    match /categories/{categoryId} {
+      allow get: if isValidId(categoryId);
+      allow list: if true;
+      allow create: if isAdmin() && isValidId(categoryId) && isValidCategory(incoming());
+      allow update: if isAdmin()
+        && isValidId(categoryId)
+        && isValidCategory(incoming())
+        && incoming().diff(existing()).affectedKeys().hasOnly(['slug', 'name', 'nameAr', 'subtitle', 'subtitleAr', 'image', 'order']);
+      allow delete: if isAdmin() && isValidId(categoryId);
+    }
+
+    match /services/{serviceId} {
+      allow get: if isValidId(serviceId);
+      allow list: if true;
+      allow create: if isAdmin() && isValidId(serviceId) && isValidService(incoming());
+      allow update: if isAdmin()
+        && isValidId(serviceId)
+        && isValidService(incoming())
+        && incoming().diff(existing()).affectedKeys().hasOnly(['title', 'titleAr', 'description', 'descriptionAr', 'icon', 'order']);
+      allow delete: if isAdmin() && isValidId(serviceId);
+    }
+
+    match /gallery/{galleryId} {
+      allow get: if isValidId(galleryId);
+      allow list: if true;
+      allow create: if isAdmin() && isValidId(galleryId) && isValidGalleryItem(incoming());
+      allow update: if isAdmin()
+        && isValidId(galleryId)
+        && isValidGalleryItem(incoming())
+        && incoming().diff(existing()).affectedKeys().hasOnly(['image', 'caption', 'captionAr', 'order']);
+      allow delete: if isAdmin() && isValidId(galleryId);
+    }
+
+    match /config/shopInfo {
+      allow get: if true;
+      allow create: if isAdmin() && isValidShopInfo(incoming());
+      allow update: if isAdmin()
+        && isValidShopInfo(incoming())
+        && incoming().diff(existing()).affectedKeys().hasOnly(['heroImages', 'heroTitle', 'heroTitleAr', 'heroSubtitle', 'heroSubtitleAr', 'whatsappNumber', 'phoneDisplay', 'address', 'addressAr', 'mapsEmbedUrl', 'mapsLink', 'hours', 'hoursAr', 'facebookUrl', 'updatedAt']);
+      allow delete: if false;
+    }
+
+    match /config/adminMeta {
+      allow get: if true;
+      allow create: if isAdmin() && isValidAdminMeta(incoming());
+      allow update: if isAdmin()
+        && isValidAdminMeta(incoming())
+        && incoming().diff(existing()).affectedKeys().hasOnly(['setupComplete', 'updatedAt']);
+      allow delete: if false;
+    }
+  }
+}

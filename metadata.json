@@ -1,0 +1,6 @@
+{
+  "name": "Omar Cell",
+  "description": "Luxury mobile phone shop on Qab Elias road, Zahle area, Lebanon. Genuine smartphones, accessories, and direct WhatsApp ordering.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
